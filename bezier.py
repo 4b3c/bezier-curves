@@ -1,11 +1,15 @@
 import pygame, math
+from usingMath import Bezier
+import numpy as np
+from numpy import array as a
+import matplotlib.pyplot as plt
 
 pygame.init()
 
 running = True
 clicked = False
 pressed = False
-points = [(140, 50), (400, 200)]
+points = [(14, 50), (40, 20)]
 slopes = []
 lengths = []
 lerp1 = []
@@ -19,16 +23,19 @@ clock = pygame.time.Clock()
 window = pygame.display.set_mode((900, 600))
 
 def draw_lines():
-	window.fill((30, 50, 60))
 	pygame.draw.lines(window, (220, 220, 220), False, points, 3)
 	for point in points:
 		pygame.draw.circle(window, (220, 220, 220), point, 7, 3)
 	if animate:
 		for lerp in lerp1:
 			pygame.draw.circle(window, (220, 220, 220), lerp, 5, 2)
-	pygame.display.update()
 
-
+def draw_curve():
+	points2 = a(points)
+	t_points = np.arange(0, 1, 0.01)
+	curve = Bezier.Curve(t_points, points2)
+	for c in range(len(curve) - 1):
+		pygame.draw.lines(window, (20, 20, 220), False, [curve[c], curve[c + 1]], 2)
 	
 while running:
 	for event in pygame.event.get():
@@ -45,31 +52,17 @@ while running:
 			for point in range(len(points) - 1):
 				slopes[point] = abs(points[point][1] - points[point + 1][1]) / abs(points[point][0] - points[point + 1][0])
 				lengths[point] = math.sqrt((points[point][1] - points[point + 1][1])**2 + (points[point][0] - points[point + 1][0])**2)
-			print(points, "\n\n", slopes, "\n\n", lengths, "\n\n")
 		if pygame.mouse.get_pos() in points:
 			pass
 	else:
 		clicked = False
 
+
+	window.fill((30, 50, 60))
 	draw_lines()
-		
-	key_press = pygame.key.get_pressed()
-	if key_press[pygame.K_RETURN]:
-		if not pressed:
-			animate = True
-			pressed = True
-	else:
-		pressed = False
+	draw_curve()
+	pygame.display.update()
 
-	if animate:
-		step = step + direction
-		print(lerp1[0])
-		if step == 200 or step == 0:
-			direction = -direction
-
-		for lerp in range(len(lerp1)):
-			lerp1[lerp][0] += (lengths[lerp] * step) / (slopes[lerp] * 200)
-			lerp1[lerp][1] += (slopes[lerp] * lengths[lerp] * step) / 200
 
 	clock.tick(30)
 
