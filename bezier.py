@@ -42,20 +42,37 @@ while running:
 		if event.type == pygame.QUIT:
 			running = False
 
+	mouse_pos = pygame.mouse.get_pos()
+
 	if pygame.mouse.get_pressed()[0]:
+		for point in range(len(points)):
+			if abs(mouse_pos[0] - points[point][0]) < 15 and abs(mouse_pos[1] - points[point][1]) < 15:
+				clicked_index = point
+				break
+
+		if clicked_index != 0:
+			points[clicked_index] = mouse_pos
+
 		if not clicked:
 			clicked = True
-			points.append(pygame.mouse.get_pos())
+			if clicked_index == 0:
+				points.append(mouse_pos)
+
 			slopes = [i for i in range(len(points) - 1)]
 			lengths = [i for i in range(len(points) - 1)]
 			lerp1 = [list(point) for point in points[0:-1]]
 			for point in range(len(points) - 1):
 				slopes[point] = abs(points[point][1] - points[point + 1][1]) / abs(points[point][0] - points[point + 1][0])
 				lengths[point] = math.sqrt((points[point][1] - points[point + 1][1])**2 + (points[point][0] - points[point + 1][0])**2)
-		if pygame.mouse.get_pos() in points:
-			pass
 	else:
 		clicked = False
+		clicked_index = 0
+
+	if pygame.mouse.get_pressed()[2]:
+		for point in range(len(points)):
+			if abs(mouse_pos[0] - points[point][0]) < 15 and abs(mouse_pos[1] - points[point][1]) < 15:
+				points.remove(points[point])
+				break
 
 
 	window.fill((30, 50, 60))
