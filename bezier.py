@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 
 pygame.init()
 
+#8.02m by 16.54m
+
 running = True
 clicked = False
 pressed = False
@@ -18,6 +20,7 @@ neighbors = [(int(count / 5) - 2, (count % 5) - 2) for count in range(0, 25)]
 
 image = pygame.image.load('2023-FRC-Field.png')
 size = image.get_size()
+print(size)
 image = pygame.transform.scale(image, (size[0] * 1.8, size[1] * 1.8))
 
 step = 0
@@ -35,7 +38,7 @@ def draw_circles():
 
 def draw_curve():
 	points2 = a(points)
-	t_points = np.arange(0, 1, 0.01)
+	t_points = np.arange(0, 1, 0.005)
 	curve = Bezier.Curve(t_points, points2)
 	for c in range(len(curve) - 1):
 		pygame.draw.lines(window, (20, 20, 220), False, [curve[c], curve[c + 1]], 5)
@@ -44,6 +47,9 @@ while running:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			running = False
+		if event.type == pygame.KEYDOWN:
+			if event.key == pygame.K_RETURN:
+				print(Bezier.Curve(np.arange(0, 1, 0.005), a(points)))
 
 	mouse_pos = pygame.mouse.get_pos()
 
