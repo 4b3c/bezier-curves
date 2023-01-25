@@ -1,7 +1,6 @@
 import pygame, math
 from usingMath import Bezier
 import numpy as np
-from numpy import array as a
 import matplotlib.pyplot as plt
 
 pygame.init()
@@ -10,91 +9,80 @@ pygame.init()
 
 running = True
 clicked = False
-pressed = False
-points = []
-slopes = []
-lengths = []
-lerp1 = []
-animate = False
-neighbors = [(int(count / 5) - 2, (count % 5) - 2) for count in range(0, 25)]
 
 image = pygame.image.load('2023-FRC-Field.png')
 size = image.get_size()
 print(size)
 image = pygame.transform.scale(image, (size[0] * 1.8, size[1] * 1.8))
 
-step = 0
-direction = 1
 clock = pygame.time.Clock()
-
 window = pygame.display.set_mode(((size[0] * 1.8) + 140, (size[1] * 1.8) + 140))
 
-def draw_lines():
-	pygame.draw.lines(window, (220, 220, 220), False, points, 3)
+class Curve:
+	def __init__(self, start):
+		self.points = np.array([(start)])
 
-def draw_circles():
-	for point in points:
-		pygame.draw.circle(window, (220, 220, 220), point, 7, 3)
+	def calc_curve(self, resolution = 0.005):
+		points = np.array(self.points)
+		t_points = np.arange(0, 1, 0.005)
+		self.curve = Bezier.Curve(t_points, self.points)
 
-def draw_curve():
-	points2 = a(points)
-	t_points = np.arange(0, 1, 0.005)
-	curve = Bezier.Curve(t_points, points2)
-	for c in range(len(curve) - 1):
-		pygame.draw.lines(window, (20, 20, 220), False, [curve[c], curve[c + 1]], 5)
-	
+	def draw_lines(self, display):
+		if len(self.points) > 1:
+			now_points = [tuple(coord) for coord in self.points]
+			now_curve = [tuple(coord) for coord in self.curve]
+			pygame.draw.lines(display, (220, 220, 220), False, list(now_points), 3)
+			pygame.draw.lines(display, (20, 20, 220), False, list(now_curve), 3)
+		for point in self.points:
+			pygame.draw.circle(display, (220, 220, 220), point, 7, 3)
+
+	def new_point(self, coord):
+		self.points = np.append(self.points, np.array([coord]), 0)
+		self.calc_curve()
+
+	def check_click(self, coord, right):
+		for point in range(len(self.points)):
+			if abs(coord[0] - self.points[point][0]) < 15 and abs(coord[1] - self.points[point][1]) < 15:
+				if right:
+					self.points.remove(self.points[point])
+					self.calc_curve()
+					return
+				break
+		point += 1
+		if not right:
+			if point == len(self.points):
+				self.new_point(coord)
+
+
+main_curve = Curve([10, 10])
+
+
 while running:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			running = False
 		if event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_RETURN:
-				print(Bezier.Curve(np.arange(0, 1, 0.005), a(points)))
+				print(main_curve.curve)
 
 	mouse_pos = pygame.mouse.get_pos()
+	mouse_press = pygame.mouse.get_pressed()
 
-	if pygame.mouse.get_pressed()[0]:
-		for point in range(len(points)):
-			if abs(mouse_pos[0] - points[point][0]) < 15 and abs(mouse_pos[1] - points[point][1]) < 15:
-				clicked_index = point
-				break
+	if mouse_press[0] == True and clicked == False:
+		main_curve.check_click(mouse_pos, False)
+		clicked = True
 
-		if clicked_index != 0:
-			points[clicked_index] = mouse_pos
+	elif mouse_press[2] == True and clicked == False:
+		main_curve.check_click(mouse_pos, True)
+		clicked = True
 
-		if not clicked:
-			clicked = True
-			if clicked_index == 0:
-				points.append(mouse_pos)
-
-			if len(points) > 1:
-				slopes = [i for i in range(len(points) - 1)]
-				lengths = [i for i in range(len(points) - 1)]
-
-				for point in range(len(points) - 1):
-					slopes[point] = abs(points[point][1] - points[point + 1][1]) / abs(points[point][0] - points[point + 1][0])
-					lengths[point] = math.sqrt((points[point][1] - points[point + 1][1])**2 + (points[point][0] - points[point + 1][0])**2)
-	else:
+	elif mouse_press[0] == False and mouse_press[2] == False:
 		clicked = False
-		clicked_index = 0
-
-	if pygame.mouse.get_pressed()[2]:
-		for point in range(len(points)):
-			if abs(mouse_pos[0] - points[point][0]) < 15 and abs(mouse_pos[1] - points[point][1]) < 15:
-				points.remove(points[point])
-				break
-
 
 	window.fill((30, 50, 60))
 	window.blit(image, (70, 70))
-	if len(points) > 0:
-		draw_circles()
-	if len(points) > 1:
-		draw_lines()
-		draw_curve()
+	main_curve.draw_lines(window)
 	pygame.display.update()
-
-
 	clock.tick(30)
 
 
