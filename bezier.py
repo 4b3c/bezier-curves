@@ -12,7 +12,6 @@ clicked = False
 
 image = pygame.image.load('2023-FRC-Field.png')
 size = image.get_size()
-print(size)
 image = pygame.transform.scale(image, (size[0] * 1.8, size[1] * 1.8))
 
 clock = pygame.time.Clock()
@@ -21,9 +20,9 @@ window = pygame.display.set_mode(((size[0] * 1.8) + 140, (size[1] * 1.8) + 140))
 class Curve:
 	def __init__(self, start):
 		self.points = np.array([(start)])
+		self.moving = -1
 
 	def calc_curve(self, resolution = 0.005):
-		points = np.array(self.points)
 		t_points = np.arange(0, 1, 0.005)
 		self.curve = Bezier.Curve(t_points, self.points)
 
@@ -43,15 +42,23 @@ class Curve:
 	def check_click(self, coord, right):
 		for point in range(len(self.points)):
 			if abs(coord[0] - self.points[point][0]) < 15 and abs(coord[1] - self.points[point][1]) < 15:
-				if right:
-					self.points.remove(self.points[point])
-					self.calc_curve()
-					return
-				break
-		point += 1
-		if not right:
-			if point == len(self.points):
-				self.new_point(coord)
+				return point
+		return -1
+
+	def delete(self, point):
+		placeholder = list(self.points)
+		placeholder.pop(point)
+		self.points = np.array(placeholder)
+		self.calc_curve()
+
+	def add_point(self, coord):
+		self.points = np.append(self.points, np.array([coord]), 0)
+		self.calc_curve()
+
+	def move_point(self, point, coord):
+		self.moving = point
+		self.points[point] = np.array([coord])
+		self.calc_curve()
 
 
 main_curve = Curve([10, 10])
@@ -68,21 +75,30 @@ while running:
 	mouse_pos = pygame.mouse.get_pos()
 	mouse_press = pygame.mouse.get_pressed()
 
-	if mouse_press[0] == True and clicked == False:
-		main_curve.check_click(mouse_pos, False)
-		clicked = True
+	if main_curve.moving != -1:
+		main_curve.move_point(main_curve.moving, mouse_pos)
 
-	elif mouse_press[2] == True and clicked == False:
-		main_curve.check_click(mouse_pos, True)
-		clicked = True
-
-	elif mouse_press[0] == False and mouse_press[2] == False:
+	if mouse_press[0]:
+		point = main_curve.check_click(mouse_pos, False)
+		if point == -1 and clicked == False:
+			main_curve.add_point(np.array(mouse_pos))
+			clicked = True
+		elif main_curve.moving == -1:
+			main_curve.move_point(point, mouse_pos)
+	elif mouse_press[2] and clicked == False:
+		point = main_curve.check_click(mouse_pos, True)
+		if point != -1:
+			main_curve.delete(point)
+			clicked = True
+	else:
 		clicked = False
+		main_curve.moving = -1
 
 	window.fill((30, 50, 60))
 	window.blit(image, (70, 70))
 	main_curve.draw_lines(window)
 	pygame.display.update()
 	clock.tick(30)
+
 
 
