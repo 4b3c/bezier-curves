@@ -1,4 +1,4 @@
-import pygame
+import pygame, button
 from bezier import Curve
 import numpy as np
 
@@ -17,7 +17,12 @@ clock = pygame.time.Clock()
 window = pygame.display.set_mode(((size[0] * 1.8) + 340, (size[1] * 1.8) + 140))
 
 main_curve = Curve([10, 10])
-
+buttons = [
+			button.button(40, (1200, 70), "add curve", top_size = 2),
+			button.button(40, (1200, 170), "  save   ", top_size = 2),
+			button.button(40, (1200, 270), "  load   ", top_size = 2),
+			button.button(40, (1200, 370), " export  ", top_size = 2)
+		  ]
 
 while running:
 	for event in pygame.event.get():
@@ -57,6 +62,8 @@ while running:
 	window.fill((30, 50, 60))
 	window.blit(image, (70, 70))
 	main_curve.draw_lines(window)
+	for butt in buttons:
+		butt.draw(window, mouse_pos, mouse_press[0])
 	pygame.display.update()
 	clock.tick(30)
 
