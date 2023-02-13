@@ -25,7 +25,12 @@ while running:
 			running = False
 		if event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_RETURN:
-				print(main_curve.curve)
+				startx = np.transpose(main_curve.curve)[0][0]
+				starty = np.transpose(main_curve.curve)[1][0]
+				for x, y in zip(np.transpose(main_curve.curve)[0], np.transpose(main_curve.curve)[1]):
+					print("{" + str(round((x - startx) * 30, 2)) + ", " + str(round((y - starty) * -30, 2)) + "},")
+
+				print("NEW CURVE")
 
 	mouse_pos = pygame.mouse.get_pos()
 	mouse_press = pygame.mouse.get_pressed()
