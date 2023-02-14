@@ -18,10 +18,10 @@ window = pygame.display.set_mode(((size[0] * 1.8) + 340, (size[1] * 1.8) + 140))
 
 main_curve = Curve([10, 10])
 buttons = [
-			button.button(40, (1200, 70), "add curve", top_size = 2),
-			button.button(40, (1200, 170), "  save   ", top_size = 2),
-			button.button(40, (1200, 270), "  load   ", top_size = 2),
-			button.button(40, (1200, 370), " export  ", top_size = 2)
+			button.button(35, (1200, 70), "Add curve", 200, 80),
+			button.button(35, (1200, 170), "Save", 200, 80),
+			button.button(35, (1200, 270), "Load", 200, 80),
+			button.button(35, (1200, 370), "Export", 200, 80)
 		  ]
 
 while running:
@@ -64,6 +64,21 @@ while running:
 	main_curve.draw_lines(window)
 	for butt in buttons:
 		butt.draw(window, mouse_pos, mouse_press[0])
+		if butt.pressed:
+			if buttons[0] == butt:
+				pass
+			elif buttons[1] == butt:
+				pass
+			elif buttons[2] == butt:
+				pass
+			elif buttons[3] == butt:
+				startx = np.transpose(main_curve.curve)[0][0]
+				starty = np.transpose(main_curve.curve)[1][0]
+				for x, y in zip(np.transpose(main_curve.curve)[0], np.transpose(main_curve.curve)[1]):
+					print("{" + str(round((x - startx) * 30, 2)) + ", " + str(round((y - starty) * -30, 2)) + "},")
+
+				print("NEW CURVE")
+				
 	pygame.display.update()
 	clock.tick(30)
 
