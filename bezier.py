@@ -3,9 +3,10 @@ import numpy as np
 import pygame
 
 class Curve:
-	def __init__(self, start):
+	def __init__(self, start, color):
 		self.points = np.array([(start)])
 		self.moving = -1
+		self.color = color
 
 	def calc_curve(self, resolution = 0.005):
 		t_points = np.arange(0, 1, 0.005)
@@ -16,7 +17,7 @@ class Curve:
 			now_points = [tuple(coord) for coord in self.points]
 			now_curve = [tuple(coord) for coord in self.curve]
 			pygame.draw.lines(display, (220, 220, 220), False, list(now_points), 3)
-			pygame.draw.lines(display, (20, 20, 220), False, list(now_curve), 3)
+			pygame.draw.lines(display, self.color, False, list(now_curve), 3)
 		for point in self.points:
 			pygame.draw.circle(display, (220, 220, 220), point, 7, 3)
 
