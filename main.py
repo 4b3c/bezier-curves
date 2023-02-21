@@ -4,17 +4,32 @@ import numpy as np
 
 pygame.init()
 
-#8.02m by 16.54m
+#651.25in X 315.5in
+
+y_ratio = 1.53120921305182341650671
+x_ratio = 1.55752773375594294770206
+
+# Conversion from motor units to inches:
+# 5083 / 90.75 = 56.011
+# 1974 / 35 = 56.4
+# 5683 / 99.5 = 57.115
+# 3114 / 54.125 = 57.53
+# 17144 / 300.5 = 57.05
+# 5194 / 94.5 = 54.96
+# average = 56.5
+
+
 # Constants/initialization - constants/initialization - constants/initialization - constants/initialization
 clicked = False
 load_file = False
+save_file = "None"
 
 image = pygame.image.load('2023-FRC-Field.png')
-size = image.get_size()
-image = pygame.transform.scale(image, (size[0] * 1.8, size[1] * 1.8))
+size = (image.get_size()[0] * 1.8, image.get_size()[1] * 1.8)
+image = pygame.transform.scale(image, size)
 
 clock = pygame.time.Clock()
-window = pygame.display.set_mode(((size[0] * 1.8) + 340, (size[1] * 1.8) + 240))
+window = pygame.display.set_mode(((size[0]) + 340, (size[1]) + 240))
 
 colors = {
 	0: (255, 0, 0),     # Red
@@ -51,11 +66,11 @@ BOX_PADDING = 10
 
 def draw_curve_list():
 	# Draw curve indicator background
-	pygame.draw.rect(window, (80, 80, 80), (BOX_X, BOX_Y, BOX_WIDTH_WIDE, (BOX_HEIGHT_TALL) * len(curves) + BOX_PADDING), border_radius=3)
+	pygame.draw.rect(window, (80, 80, 80), (BOX_X, BOX_Y, BOX_WIDTH_WIDE, (BOX_HEIGHT_TALL) * len(curves) + BOX_PADDING), border_radius = 3)
 	for i, curve in enumerate(curves):
 		box_color = (220, 220, 220) if i == mode else (100, 100, 100)
-		pygame.draw.rect(window, box_color, (BOX_X + BOX_PADDING, BOX_Y + BOX_PADDING + i * (BOX_HEIGHT_TALL), BOX_WIDTH, BOX_HEIGHT), border_radius=3)
-		pygame.draw.rect(window, curve.color, (BOX_X + BOX_WIDTH - (BOX_PADDING * 4), BOX_Y + (BOX_PADDING * 2) + i * (BOX_HEIGHT_TALL), BOX_PADDING * 4, BOX_PADDING * 2), border_radius=3)
+		pygame.draw.rect(window, box_color, (BOX_X + BOX_PADDING, BOX_Y + BOX_PADDING + i * (BOX_HEIGHT_TALL), BOX_WIDTH, BOX_HEIGHT), border_radius = 3)
+		pygame.draw.rect(window, curve.color, (BOX_X + BOX_WIDTH - (BOX_PADDING * 4), BOX_Y + (BOX_PADDING * 2) + i * (BOX_HEIGHT_TALL), BOX_PADDING * 4, BOX_PADDING * 2), border_radius = 3)
 
 		# Draw the curve number in the box
 		font = pygame.font.SysFont("Arial", 20)
@@ -66,23 +81,28 @@ def draw_curve_list():
 def add_curve():
 	curves.append(Curve(list(curves[-1].points[-1]), colors[len(curves)]))
 
-def save():
-	files = os.listdir('paths//')
-	highest = 0
+def save(save_file):
+	if save_file == "None":
+		files = os.listdir('paths//')
+		highest = 0
 
-	for file in files:
-		if int(file[-5]) > highest:
-			highest = int(file[-5])
+		for file in files:
+			if int(file[-5]) > highest:
+				highest = int(file[-5])
 
-	with open('paths//path' + str(highest + 1) + '.pkl', 'wb') as f:
+		save_file = 'paths//path' + str(highest + 1) + '.pkl'
+
+	with open(save_file, 'wb') as f:
 		pickle.dump(curves, f)
+
+	return save_file
 
 def export():
 	for curve in curves:
 		startx = np.transpose(curve.curve)[0][0]
 		starty = np.transpose(curve.curve)[1][0]
 		for x, y in zip(np.transpose(curve.curve)[0], np.transpose(curve.curve)[1]):
-			print("{" + str(round((x - startx) * 30, 2)) + ", " + str(round((y - starty) * -30, 2)) + "},")
+			print("{" + str(round((x - startx) / x_ratio, 2)) + ", " + str(round((y - starty) / -y_ratio, 2)) + "},")
 
 		print("END OF CURVE")
 
@@ -100,12 +120,12 @@ def load():
 		mouse_pos = pygame.mouse.get_pos()
 		mouse_press = pygame.mouse.get_pressed()
 
-		pygame.draw.rect(window, (80, 80, 80), (200, 100, 300, 10 + len(file_names) * 97.5), border_radius=3)
+		pygame.draw.rect(window, (80, 80, 80), (200, 100, 300, 10 + len(file_names) * 97.5), border_radius = 3)
 		for i, file in enumerate(file_names):
-			rect = pygame.draw.rect(window, box_color, (210, 115 + i * 95, 280, 80), border_radius=3)
+			rect = pygame.draw.rect(window, box_color, (210, 115 + i * 95, 280, 80), border_radius = 3)
 
 			text = font.render(file[:-4], True, (0, 0, 0))
-			text_rect = text.get_rect(center=(210 + 140, (115 + i * 95) + 40))
+			text_rect = text.get_rect(center = (210 + 140, (115 + i * 95) + 40))
 			window.blit(text, text_rect)
 
 			if rect.collidepoint(mouse_pos) and mouse_press[0]:
@@ -161,11 +181,12 @@ while True:
 					mode += 1
 					break
 				elif buttons[1] == button:
-					save()
+					save_file = save(save_file)
 					break
 				elif buttons[2] == button:
 					with open("paths//" + load(), 'rb') as f:
 						curves = pickle.load(f)
+					mode = 0
 					break
 				elif buttons[3] == button:
 					export()
