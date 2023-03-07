@@ -87,8 +87,11 @@ def save(save_file):
 		highest = 0
 
 		for file in files:
-			if int(file[-5]) > highest:
-				highest = int(file[-5])
+			try:	
+				if int(file[-5]) > highest:
+					highest = int(file[-5])
+			except:
+				break
 
 		save_file = 'paths//path' + str(highest + 1) + '.pkl'
 
@@ -102,7 +105,7 @@ def export():
 		startx = np.transpose(curve.curve)[0][0]
 		starty = np.transpose(curve.curve)[1][0]
 		for x, y in zip(np.transpose(curve.curve)[0], np.transpose(curve.curve)[1]):
-			print("{" + str(round((x - startx) / x_ratio, 2)) + ", " + str(round((y - starty) / -y_ratio, 2)) + "},")
+			print("{" + str(round((y - starty) / -x_ratio, 2)) + ", " + str(round((x - startx) / -y_ratio, 2)) + "},")
 
 		print("END OF CURVE")
 
