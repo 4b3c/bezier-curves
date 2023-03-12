@@ -1,15 +1,37 @@
 from usingMath import Bezier
 import numpy as np
-import pygame
+import pygame, math
+
+def dist_between_points(coords1, coords2):
+	distx = coords2[0] - coords1[0]
+	disty = coords2[1] - coords1[1]
+	return math.sqrt(distx * distx + disty * disty);
+
+def calculate_length(points):
+	length = 0
+	for i in range(len(points) - 1):
+		length += dist_between_points(points[i], points[i + 1])
+
+	return length
+
+def calc_curve(points, resolution = 0.05):
+	t_points = np.arange(0, 1, resolution)
+	return Bezier.Curve(t_points, points)
 
 class Curve:
-	def __init__(self, start, color):
-		self.points = np.array([(start)])
-		self.moving = -1
-		self.color = color
+	def __init__(self, start, color, points = [[None]]):
+		if points[0][0] == None:
+			self.points = np.array([(start)])
+			self.moving = -1
+			self.color = color
+		else:
+			self.points = points
+			curve_points = calc_curve(self.points)
+			self.length = calculate_length(curve_points)
+			
 
-	def calc_curve(self, resolution = 0.005):
-		t_points = np.arange(0, 1, 0.005)
+	def calc_curve(self, resolution = 0.05):
+		t_points = np.arange(0, 1, resolution)
 		self.curve = Bezier.Curve(t_points, self.points)
 
 	def draw_lines(self, display):
@@ -45,4 +67,3 @@ class Curve:
 		self.moving = point
 		self.points[point] = np.array([coord])
 		self.calc_curve()
-

@@ -104,7 +104,12 @@ def export():
 	for curve in curves:
 		startx = np.transpose(curve.curve)[0][0]
 		starty = np.transpose(curve.curve)[1][0]
-		for x, y in zip(np.transpose(curve.curve)[0], np.transpose(curve.curve)[1]):
+
+		new_res_curve = Curve(0, 0, curve.points)
+		new_res_curve.calc_curve(1 / (new_res_curve.length / 5))
+		curve = new_res_curve.curve
+
+		for x, y in zip(np.transpose(curve)[0], np.transpose(curve)[1]):
 			print("{" + str(round((y - starty) / -x_ratio, 2)) + ", " + str(round((x - startx) / -y_ratio, 2)) + "},")
 
 		print("END OF CURVE")
