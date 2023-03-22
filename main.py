@@ -110,7 +110,7 @@ def export():
 		curve = new_res_curve.curve
 
 		for x, y in zip(np.transpose(curve)[0], np.transpose(curve)[1]):
-			print("{" + str(round((y - starty) / -x_ratio, 2)) + ", " + str(round((x - startx) / -y_ratio, 2)) + "},")
+			print("{" + str(round((y - starty) / x_ratio, 2)) + ", " + str(round((x - startx) / y_ratio, 2)) + "},")
 
 		print("END OF CURVE")
 
