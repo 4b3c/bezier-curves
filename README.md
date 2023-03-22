@@ -1,2 +1,2 @@
 # bezier-curves
- i just want to experiment with bezier curves and animations
+ a pygame application for generating paths with waypoints to be used for the CocoNuts FRC autonomous period
